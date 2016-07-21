@@ -50,8 +50,8 @@ void ofApp::update(){
     ofxOscMessage m;
     m.setAddress("/position");
         m.addFloatArg(tag.position.value().x);
-        m.addFloatArg(tag.position.value().y);
         m.addFloatArg(tag.position.value().z);
+        m.addFloatArg(tag.position.value().y);
     oscsender.sendMessage(m, false);
         
 }
@@ -72,7 +72,7 @@ void ofApp::onSerialBuffer(const ofx::IO::SerialBufferEventArgs& args)
         
         if (dataStrings[0] == "ANCHOR"){
             
-            ofVec3f pos = ofVec3f( ofToFloat(dataStrings[2])/1000, ofToFloat(dataStrings[4])/1000, ofToFloat(dataStrings[3])/1000);
+            ofVec3f pos = ofVec3f( ofToFloat(dataStrings[2])/1000, ofToFloat(dataStrings[3])/1000, ofToFloat(dataStrings[4])/1000);
             string id = dataStrings[1];
             
             cout << dataStrings[0]<< endl;
@@ -88,9 +88,9 @@ void ofApp::onSerialBuffer(const ofx::IO::SerialBufferEventArgs& args)
                 
                 // !!! switching Z & Y
                 tag.id = dataStrings[1];
-                tag.rawPosition = ofVec3f( ofToFloat(dataStrings[2])/1000, ofToFloat(dataStrings[4])/1000, ofToFloat(dataStrings[3])/1000);
+                tag.rawPosition = ofVec3f( ofToFloat(dataStrings[2])/1000, ofToFloat(dataStrings[3])/1000, ofToFloat(dataStrings[4])/1000);
                 tag.position.update(tag.rawPosition);
-                tag.error = ofVec3f( ofToFloat(dataStrings[5])/1000, ofToFloat(dataStrings[7])/1000, ofToFloat(dataStrings[6])/1000);
+                tag.error = ofVec3f( ofToFloat(dataStrings[5])/1000, ofToFloat(dataStrings[6])/1000, ofToFloat(dataStrings[7])/1000);
                 tag.errXZ = ofToFloat(dataStrings[8])/1000;
                 tag.errXY = ofToFloat(dataStrings[9])/1000;
                 tag.errYZ = ofToFloat(dataStrings[10])/1000;
@@ -129,37 +129,31 @@ void ofApp::draw(){
 
     ofPushStyle();
     ofSetColor(155,100,100);
-    ofDrawGrid(1.0f, 10.0f, true, false, true, false);
+    ofDrawGrid(1.0f, 10.0f, true, false, false, true);
     ofDrawAxis(10);
     ofPopStyle();
     
     // Stage
     ofPushStyle();
-    ofSetColor(0,200,255, 100);
+    ofSetColor(ofColor::deepSkyBlue, 100);
     
     ofPushMatrix();
-    ofTranslate(0.61,0.,0.61);
+    ofTranslate(1.22,1.22,0);
+    ofDrawPlane(-0.61, -0.61, 1.21, 1.21);
+    ofPopMatrix();
+    
+    ofPushMatrix();
+    ofTranslate(1.22,1.22,1.22);
     ofRotateX(90);
-    ofDrawPlane(0, 0, 1.21, 1.21);
+    ofDrawPlane(-0.61, -0.61, 1.21, 1.21);
     ofPopMatrix();
-    
-    ofPushMatrix();
-    ofTranslate(0.61,0.61,1.22);
-    ofDrawPlane(0, 0, 1.21, 1.21);
-    ofPopMatrix();
-    
-    ofPushMatrix();
-    ofRotateY(90);
-    ofTranslate(-0.61,0.61,1.22);
-    ofDrawPlane(0, 0, 1.21, 1.21);
-    ofPopMatrix();
-    
-//    ofSetColor(0,255,150);
-//    ofSetLineWidth(3);
-//    ofDrawLine(0, 0, 1.22, 1.22, 0, 1.22);
-//    ofDrawLine(1.22, 0, 0, 1.22, 0, 1.22);
-//    ofDrawLine(1.22, 0, 1.22, 1.22, 1.22, 1.22);
 
+    ofPushMatrix();
+    ofTranslate(1.22,1.22,0);
+    ofRotateY(90);
+    ofDrawPlane(-0.61, -0.61, 1.21, 1.21);
+    ofPopMatrix();
+    
     ofPopStyle();
     
     // DRAW ANCORS
@@ -168,23 +162,30 @@ void ofApp::draw(){
     {
         ofVec3f pos = (*ii).second;
         ofPushStyle();
-        ofSetColor(255, 0, 0);
+        ofSetColor(ofColor::orangeRed);
         ofDrawBox(pos, 0.10);
         ofSetColor(255);
-        ofDrawBitmapString((*ii).first, pos.x+0.1, pos.y+0.1, pos.z);
+        
+        std::stringstream sst;
+        sst << "ID : " << (*ii).first << std::endl;
+        sst << "pos: " << setprecision (2) << fixed << pos;
+        ofDrawBitmapString(sst.str(), pos.x+0.1, pos.y-0.15, pos.z);
         ofPopStyle();
         
     }
     
     // draw TAG
     ofPushStyle();
-    ofSetColor(0,0,255);
+    ofSetColor(ofColor::yellow);
     ofDrawSphere(tag.position.value(), 0.10);
-    ofSetColor(0, 150, 255);
+    ofSetColor(ofColor::orange);
     ofDrawSphere(tag.rawPosition, 0.05);
 
     ofSetColor(255);
-    ofDrawBitmapString(tag.id, tag.position.value().x+0.1, tag.position.value().y+0.1, tag.position.value().z);
+    std::stringstream sst;
+    sst << "ID : " << tag.id << std::endl;
+    sst << "pos: " << setprecision (2) << fixed << tag.position.value();
+    ofDrawBitmapString(sst.str(), tag.position.value().x+0.1, tag.position.value().y-0.15, tag.position.value().z);
     ofPopStyle();
     
     camera.end();
